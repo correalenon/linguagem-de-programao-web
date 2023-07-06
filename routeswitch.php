@@ -16,6 +16,11 @@
             require __DIR__ . "/pages/administrador.php";
         }
 
+        protected function administrador_actions()
+        {
+            require __DIR__ . "/pages/administrador_actions.php";
+        }
+
         protected function professor()
         {
             require __DIR__ . "/pages/professor.php";
@@ -24,6 +29,11 @@
         protected function aluno()
         {
             require __DIR__ . "/pages/aluno.php";
+        }
+
+        protected function logout()
+        {
+            require __DIR__ . "/pages/logout.php";
         }
         
         public function __call($name, $arguments)
