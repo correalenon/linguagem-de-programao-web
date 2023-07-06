@@ -26,29 +26,37 @@
 
         public function createStudent(string $nome, string $email, string $matricula, string $datanascimento)
         {
-            $query = "INSERT INTO aluno (nome, email, matricula, datanascimento) VALUES ('$nome', '$email', '$matricula', '$datanascimento')";
-            $sql = mysqli_query($this->connection, $query);
-            if (!$sql) {
+            $query_aluno = "INSERT INTO aluno (nome, email, matricula, datanascimento) VALUES ('$nome', '$email', '$matricula', '$datanascimento')";
+            $query_login = "INSERT INTO login_aluno (username, id_aluno, password)
+                            SELECT email, id, matricula FROM aluno WHERE nome = '$nome' 
+                            AND email = '$email' AND matricula = '$matricula' AND datanascimento = '$datanascimento'";
+
+            $sql_aluno = mysqli_query($this->connection, $query_aluno);
+            $sql_login = mysqli_query($this->connection, $query_login);
+            if (!$sql_aluno && !$sql_login) {
                 die("Falha na consulta ao banco.");
             }
-            if (empty($sql)) {
+            if (empty($sql_aluno) || empty($sql_login)) {
                 return False;
             } else {
-                return $sql;
+                return array($sql_aluno, $sql_login);
             }
         }
 
         public function updateStudent(string $id, string $nome, string $email, string $matricula, string $datanascimento)
         {
-            $query = "UPDATE aluno SET nome = '$nome', email = '$email', matricula = '$matricula', datanascimento = '$datanascimento' WHERE id = '$id'";
-            $sql = mysqli_query($this->connection, $query);
-            if (!$sql) {
+            $query_aluno = "UPDATE aluno SET nome = '$nome', email = '$email', matricula = '$matricula', datanascimento = '$datanascimento' WHERE id = '$id'";
+            $query_login = "UPDATE login_aluno SET username = '$email' WHERE id_aluno = '$id'";
+
+            $sql_aluno = mysqli_query($this->connection, $query_aluno);
+            $sql_login = mysqli_query($this->connection, $query_login);
+            if (!$sql_aluno && !$sql_login) {
                 die("Falha na consulta ao banco.");
             }
-            if (empty($sql)) {
+            if (empty($sql_aluno) || empty($sql_login)) {
                 return False;
             } else {
-                return $sql;
+                return array($sql_aluno, $sql_login);
             }
         }
 
@@ -68,7 +76,9 @@
 
         public function getTeachers()
         {
-            $query = "SELECT id, nome, email, datanascimento FROM professor";
+            $query = "SELECT P.id, P.nome, P.email, P.datanascimento, D.disciplina, D.id AS id_disciplina from disciplinas_ministradas DM 
+                        JOIN professor P ON P.id = DM.id_professor 
+                        JOIN disciplinas D ON D.id = DM.id_disciplina";
             $sql = mysqli_query($this->connection, $query);
             if (!$sql) {
                 die("Falha na consulta ao banco.");
@@ -80,17 +90,39 @@
             }
         }
 
-        public function updateTeacher(string $id, string $nome, string $email, string $datanascimento)
+        public function createTeacher(string $nome, string $email, string $datanascimento)
         {
-            $query = "UPDATE professor SET nome = '$nome', email = '$email', datanascimento = '$datanascimento' WHERE id = '$id'";
-            $sql = mysqli_query($this->connection, $query);
-            if (!$sql) {
+            $query_professor = "INSERT INTO professor (nome, email, datanascimento) VALUES ('$nome', '$email', '$datanascimento')";
+            $query_login = "INSERT INTO login_professor (username, id_professor, password)
+                            SELECT email, id, datanascimento FROM professor WHERE nome = '$nome' 
+                            AND email = '$email' AND datanascimento = '$datanascimento'";
+
+            $sql_professor = mysqli_query($this->connection, $query_professor);
+            $sql_login = mysqli_query($this->connection, $query_login);
+            if (!$sql_professor && !$sql_login) {
                 die("Falha na consulta ao banco.");
             }
-            if (empty($sql)) {
+            if (empty($sql_professor) || empty($sql_login)) {
                 return False;
             } else {
-                return $sql;
+                return array($sql_professor, $sql_login);
+            }
+        }
+
+        public function updateTeacher(string $id, string $nome, string $email, string $datanascimento)
+        {
+            $query_professor = "UPDATE professor SET nome = '$nome', email = '$email', datanascimento = '$datanascimento' WHERE id = '$id'";
+            $query_login = "UPDATE login_professor SET username = '$email' WHERE id_professor = '$id'";
+
+            $sql_professor = mysqli_query($this->connection, $query_professor);
+            $sql_login = mysqli_query($this->connection, $query_login);
+            if (!$sql_professor && !$sql_login) {
+                die("Falha na consulta ao banco.");
+            }
+            if (empty($sql_professor) || empty($sql_login)) {
+                return False;
+            } else {
+                return array($sql_professor, $sql_login);
             }
         }
 
@@ -145,6 +177,34 @@
         public function deleteNote(string $id)
         {
             $query = "DELETE FROM notas WHERE id = '$id'";
+            $sql = mysqli_query($this->connection, $query);
+            if (!$sql) {
+                die("Falha na consulta ao banco.");
+            }
+            if (empty($sql)) {
+                return False;
+            } else {
+                return $sql;
+            }
+        }
+
+        public function getDisciplines()
+        {
+            $query = "SELECT id, disciplina FROM disciplinas";
+            $sql = mysqli_query($this->connection, $query);
+            if (!$sql) {
+                die("Falha na consulta ao banco.");
+            }
+            if (empty($sql)) {
+                return False;
+            } else {
+                return $sql;
+            }
+        }
+
+        public function linkStudentInDiscipline(string $id_aluno, string $id_disciplina)
+        {
+            $query = "INSERT INTO disciplinas_cursadas (id_aluno, id_disciplina) VALUES ('$id_aluno', '$id_disciplina')";
             $sql = mysqli_query($this->connection, $query);
             if (!$sql) {
                 die("Falha na consulta ao banco.");
